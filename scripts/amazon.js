@@ -1,32 +1,6 @@
-const products = [
-  {
-    image : 'images/products/athletic-cotton-socks-6-pairs.jpg',
-    name : 'Black and Gray Athletic Cotton Socks - 6 Pairs',
-    rating : {
-      star : 4.5,
-      count : 87
-    },
-    priceCents:1090
-  },
-  {
-    image : 'images/products/intermediate-composite-basketball.jpg',
-    name : 'Intermediate Size Basketball',
-    rating : {
-      star : 4.0,
-      count : 127
-    },
-    priceCents:2095
-  },
-  {
-    image : 'images/products/adults-plain-cotton-tshirt-2-pack-teal.jpg',
-    name : 'Adults Plain Cotton T-Shirt - 2 Pack',
-    rating : {
-      star : 4.5,
-      count : 56
-    },
-    priceCents:799
-  }
-];
+import { cart, addToCart, calculateCartQuantity } from '../data/cart.js';
+import {products} from '../data/products.js';
+import { formatCurrency } from './utils/money.js';
 
 let productHtml = '';
 products.forEach((product) => {
@@ -43,14 +17,14 @@ products.forEach((product) => {
 
       <div class="product-rating-container">
         <img class="product-rating-stars"
-          src="images/ratings/rating-${product.rating.star*10}.png">
+          src="images/ratings/rating-${product.rating.stars*10}.png">
         <div class="product-rating-count link-primary">
           ${product.rating.count}
         </div>
       </div>
 
       <div class="product-price">
-        $${(product.priceCents/100).toFixed(2)}
+        $${formatCurrency(product.priceCents)}
       </div>
 
       <div class="product-quantity-container">
@@ -70,12 +44,12 @@ products.forEach((product) => {
 
       <div class="product-spacer"></div>
 
-      <div class="added-to-cart">
+      <div class="added-to-cart js-added-to-cart-${product.id}" style="opacity:0;">
         <img src="images/icons/checkmark.png">
         Added
       </div>
 
-      <button class="add-to-cart-button button-primary">
+      <button class="add-to-cart-button button-primary js-add-to-cart" data-product-id = "${product.id}">
         Add to Cart
       </button>
     </div>
@@ -83,3 +57,21 @@ products.forEach((product) => {
 });
 
 document.querySelector('.js-product-list').innerHTML = productHtml;
+
+function updateCartQuantity(){
+    const cartQuantity = calculateCartQuantity();
+    document.querySelector('.js-cart-quantity').innerHTML = cartQuantity;
+}
+
+updateCartQuantity();
+
+document.querySelectorAll('.js-add-to-cart').forEach((button) => {
+  button.addEventListener('click', () => {
+    const productId = button.dataset.productId;
+
+    addToCart(productId);
+    updateCartQuantity();
+    
+    document.querySelector(`.js-added-to-cart-${productId}`).style.opacity = 1;
+  });
+});
